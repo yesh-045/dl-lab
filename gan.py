@@ -29,16 +29,23 @@ for i in range(10):
     y = np.array([1,0])
     
     D.trainable = True
-    D.train(X, y)
+    D.fit(X, y, verbose=0)
 
     # train G
     D.trainable = False
-    gan.train(np.random.randn(1,2), np.array([1]))
+    gan.fit(np.random.randn(1,2), np.array([1]), verbose=0)
 
     print("epoch", i)
 
 
 # generate
-print("\nGenerated:")
+print("\nGenerated + discriminator prediction:")
 for _ in range(3):
-    print(G.predict(np.random.randn(1,2), verbose=0).round())
+    sample = G.predict(np.random.randn(1,2), verbose=0)
+    disc_prob = D.predict(sample, verbose=0)[0][0]
+    print("sample:", sample.round(), "| D(fake) probability:", round(float(disc_prob), 4))
+
+print("\nDiscriminator prediction on real data:")
+for x_real in real:
+    real_prob = D.predict(x_real.reshape(1, 4), verbose=0)[0][0]
+    print("real:", x_real, "| D(real) probability:", round(float(real_prob), 4))
