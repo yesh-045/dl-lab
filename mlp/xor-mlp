@@ -1,0 +1,58 @@
+import random
+import math
+
+def sigmoid(x):
+    return 1/(1+math.exp(-x))
+
+X = [[0,0],[0,1],[1,0],[1,1]]
+Y = [0,1,1,0]
+
+# init
+w_h = [[random.uniform(-1,1) for _ in range(2)] for _ in range(2)]
+b_h = [random.uniform(-1,1) for _ in range(2)]
+
+w_o = [random.uniform(-1,1) for _ in range(2)]
+b_o = random.uniform(-1,1)
+
+lr = 0.1
+
+def forward(x):
+    hidden = []
+    for i in range(2):
+        net = w_h[i][0]*x[0] + w_h[i][1]*x[1] + b_h[i]
+        hidden.append(sigmoid(net))
+    
+    net_o = w_o[0]*hidden[0] + w_o[1]*hidden[1] + b_o
+    output = sigmoid(net_o)
+    
+    return hidden, output
+
+def backward(x, hidden, output, d):
+    global w_h, w_o, b_h, b_o
+    
+    delta_o = (d-output)*output*(1-output)
+    
+    delta_h = []
+    for i in range(2):
+        e = delta_o * w_o[i]
+        delta_h.append(e * hidden[i]*(1-hidden[i]))
+    
+    for i in range(2):
+        w_o[i] += lr * delta_o * hidden[i]
+    b_o += lr * delta_o
+    
+    for i in range(2):
+        w_h[i][0] += lr * delta_h[i]*x[0]
+        w_h[i][1] += lr * delta_h[i]*x[1]
+        b_h[i] += lr * delta_h[i]
+
+# train
+for epoch in range(10000):
+    for i in range(4):
+        h,o = forward(X[i])
+        backward(X[i], h, o, Y[i])
+
+# result
+for i in range(4):
+    _,o = forward(X[i])
+    print(X[i], round(o))
